@@ -1,9 +1,10 @@
 package TP_PC.ECO.PSC;
 
+import javax.sql.rowset.spi.SyncFactory;
 import javax.swing.*;
 import java.awt.Color;
 
-
+import TP_PC.ECO.PSC.Parque;
 public class Hora {
     private int hora;
     private int minuto;
@@ -12,20 +13,21 @@ public class Hora {
     private final int CIERRE = 18;
     private final int ACTIVIDADES=17;
     private boolean estadoParque;
-    private boolean FIN;
+    private boolean estadoActividad;
     private Object bloqueoA= new Object();
     
     private JLabel sout;
     private JTextField text;
 
     public Hora(JLabel sout, JTextField text) {
-        hora = 6;
+        hora = 0;
         minuto = 0;
         dia = 0;
         estadoParque=false;
+        estadoActividad=false;
         this.sout = sout;
         this.text = text;
-        FIN=false;
+       
         text.setText("CERRADO");
         text.setBackground(Color.RED);
     }
@@ -52,12 +54,20 @@ public class Hora {
                 case APERTURA:estadoParque=true;this.notifyAll();
                 text.setText("ABIERTO");
                 text.setBackground(Color.GREEN);
+                synchronized(bloqueoA){
+                    estadoActividad=true;
+                }
                     break;
-                case ACTIVIDADES:FIN=false; 
+                case ACTIVIDADES:
+                synchronized(bloqueoA){
+                    estadoActividad=false;
+                    bloqueoA.notifyAll();
+                }
                 text.setText("FIN ACTIVIDADES");
                 text.setBackground(Color.YELLOW);
                     break;
-                case CIERRE:estadoParque=false;FIN=true;
+                case CIERRE:estadoParque=false;
+               
                 text.setText("CERRADO");
                 text.setBackground(Color.RED);
                 break;
@@ -67,20 +77,20 @@ public class Hora {
             
     }
     
-    public synchronized boolean entrarParque() throws InterruptedException{
+    public synchronized boolean entrarParque(JTextArea txt) throws InterruptedException{
         while (!estadoParque) {
             this.wait();
         }
+        txt.append(	"intento entrar \n");
         return estadoParque;
     }
     
 
-    public boolean finalizarActividades() throws InterruptedException{
-        synchronized(bloqueoA){
-        }
-       
-        return estadoParque;
-
+    public boolean seguirActividades() throws InterruptedException{
+       synchronized(bloqueoA){}
+        return estadoActividad;
     }
-
 }
+
+    
+    

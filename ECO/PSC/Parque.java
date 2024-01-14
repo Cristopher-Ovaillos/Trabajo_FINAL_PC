@@ -4,7 +4,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import TP_PC.ECO.PSC.Parque;
 public class Parque {
 private Hora horario;
 private JTextArea txtEntrada;
@@ -18,7 +18,17 @@ private Lock visitantes;
     }
 
     public void aperturaParque() throws InterruptedException{
-    horario.entrarParque();
+        horario.entrarParque(txtEntrada);
+        
+    }
+
+    public boolean seguirActividades(){
+       return horario.seguirActividades();
+    }
+    
+    public void pasarMolinete(int id){
+        
+        molinete.countDown();
     }
 
     
